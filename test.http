@@ -1,0 +1,30 @@
+GET http://localhost:3000/ HTTP/1.1
+// 来自数据库的相应数据
+### 
+
+GET http://localhost:3000/hello HTTP/1.1
+
+###
+
+POST http://localhost:3000/ HTTP/1.1
+
+### 
+GET http://localhost:3000/user/0 HTTP/1.1
+// 因为我数据库还没有创建表，所以这个请求会报错
+### test sqlx link
+
+GET http://localhost:3000/protected HTTP/1.1
+Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJiQGIuY29tIiwiY29tcGFueSI6IkFDTUUiLCJleHAiOjIwMDAwMDAwMDB9.uoS4X3dqKG2_xaSwH8vu4a7GbbPflD1Bj2xgAm_8kHs
+// 持久化的token
+### test jwt token
+
+POST  http://localhost:3000/authorize HTTP/1.1
+Content-Type: application/json
+
+{
+    "id": 1,
+    "name": "HuaGu_Dragon",
+    "pwd": "123456"
+}
+
+### test json web token
