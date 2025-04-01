@@ -16,6 +16,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 use tokio::net::TcpListener;
+use tower_http::cors::CorsLayer;
 use tracing_subscriber::{fmt::format::FmtSpan, layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
@@ -37,6 +38,8 @@ async fn main() {
         .await
         .expect("can't connect to database");
 
+    let cors = CorsLayer::permissive();
+
     let app = Router::new()
         .route("/hello", get(|| async { Html("Hello, World!") }))
         .route(
@@ -47,11 +50,35 @@ async fn main() {
         .route("/user", post(create_user))
         .route("/protected", get(protected))
         .route("/authorize", post(authorize))
+        .route("/login", post(test_login))
+        .layer(cors)
         .with_state(pool);
-
+    // Cor accept all
     let listener = TcpListener::bind("localhost:3000").await.unwrap();
     tracing::debug!("listening on {}", listener.local_addr().unwrap());
     axum::serve(listener, app).await.unwrap();
+}
+
+#[derive(Debug, Deserialize)]
+struct Test {
+    username: String,
+    password: String,
+}
+
+async fn test_login(Json(payload): Json<Test>) -> Test {
+    tracing::debug!("test_login: {:?}", payload);
+    tracing::debug!("username: {:?}", payload.username);
+    payload
+}
+
+impl IntoResponse for Test {
+    fn into_response(self) -> Response {
+        let body = Json(json!({
+            "username": self.username,
+            "password": self.password,
+        }));
+        (StatusCode::OK, body).into_response()
+    }
 }
 
 #[derive(Debug, Deserialize)]
